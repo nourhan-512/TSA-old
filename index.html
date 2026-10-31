@@ -159,14 +159,8 @@ details.sg>ul{margin:0;padding:0 14px 4px;background:var(--card)}
 #cloudSt{display:flex;align-items:center;gap:5px;font-size:.72rem!important;margin-top:8px!important}
 #cloudSt:empty{display:none}
 #cloudSt svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor}
-li.hist{position:relative}
-li.hist .d{padding-right:30px}
-li.hist .acts{align-self:flex-end;margin-top:22px}
-.hx{position:absolute;top:8px;right:0;flex:none;width:26px;height:26px;min-width:0;min-height:0;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);opacity:.55;font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:color .15s,background .15s,opacity .15s}
-.hx:hover,.hx:active,.hx:focus-visible{color:var(--bad);background:rgba(198,40,40,.12);opacity:1}
 /* history rows: compact, single line */
-li.hist .d{padding-right:0}
-li.hist .acts{align-self:center;margin-top:0;margin-right:26px;gap:6px}
+li.hrow .acts{align-self:center;gap:6px}
 li .d{min-width:0}
 li.hrow .nm{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 li.hrow .nm.open{white-space:normal;word-break:break-word}
@@ -532,7 +526,7 @@ async function gate(u){
     let d=await ref.get();
     if(!d.exists){await ref.set({email:u.email.toLowerCase(),status:isAdm(u)?"approved":"pending",created:firebase.firestore.FieldValue.serverTimestamp()});d=await ref.get()}
     const st=d.data().status;
-    if(st==="approved"){approved=true;try{localStorage.setItem("qra_ok",u.uid)}catch(e){}openApp();$("adminCard").hidden=!isAdm(u);document.querySelectorAll(".att").forEach(e=>e.hidden=isAdm(u));$("cloudCard").hidden=false;$("repCard").hidden=!isAdm(u);$("clHint").textContent=isAdm(u)?"All lecturers' sessions by email. Tap ↓ to download Excel.":"Your saved sessions by subject. Tap ↺ to restore, ↓ to download Excel, × to remove from your list only.";if(isAdm(u))loadReqs();render();return}
+    if(st==="approved"){approved=true;try{localStorage.setItem("qra_ok",u.uid)}catch(e){}openApp();$("adminCard").hidden=!isAdm(u);document.querySelectorAll(".att").forEach(e=>e.hidden=isAdm(u));$("cloudCard").hidden=false;$("repCard").hidden=!isAdm(u);$("clHint").textContent=isAdm(u)?"All lecturers' sessions by email. Tap ↓ to download Excel.":"Your saved sessions by subject. Tap ↺ to restore one on this device, ↓ to download Excel.";if(isAdm(u))loadReqs();render();return}
     lockUI(false,st==="rejected"?"Your access request was declined.":"Your request is waiting for approval. Tap Check again later.",false);
   }catch(e){
     // offline: let a previously approved user keep working
@@ -573,13 +567,6 @@ function restore(v){
 }
 let cdocs=[];
 const openG=new Set();
-const hidKey=()=>"qra_hid_"+(user?user.uid:"");
-// hidden sessions are remembered on this device AND in the user's own private prefs doc, so they never come back
-let hidRemote=new Set();
-const prefRef=()=>db.collection("backups").doc(user.uid).collection("prefs").doc("hidden");
-const hidGet=()=>new Set([...load(hidKey(),[]),...hidRemote]);
-const hidAdd=id=>{hidRemote.add(id);store(hidKey(),[...hidGet()]);prefRef().set({ids:firebase.firestore.FieldValue.arrayUnion(id)},{merge:true}).catch(()=>{})};
-async function hidLoad(){try{const d=await prefRef().get();hidRemote=new Set((d.exists&&d.data().ids)||[]);store(hidKey(),[...hidGet()])}catch(e){}}
 function drawCloud(){
   const box=$("cl"),q=norm($("clQ").value.trim()),adm=isAdm(user);box.innerHTML="";
   const fl=$("fLevel").value,fg=$("fGroup").value,fs=$("fSubj").value,filt=!!(q||fl||fg||fs);
@@ -599,8 +586,8 @@ function drawCloud(){
     const ul=document.createElement("ul");det.appendChild(ul);
     g.items.forEach(({d,v})=>{
       const mine=d.ref.parent.parent.id===user.uid,li=document.createElement("li");
-      li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+(adm?'<button class="ic del" data-a="d" title="Delete session" aria-label="Delete session">'+IC_DEL+'</button>':'')+'</div>'+(adm?'':'<button class="hx" data-a="h" title="Remove from my history" aria-label="Remove from my history">\u00d7</button>');
-      li.classList.add("hrow");if(!adm)li.classList.add("hist");
+      li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+(adm?'<button class="ic del" data-a="d" title="Delete session" aria-label="Delete session">'+IC_DEL+'</button>':'')+'</div>';
+      li.classList.add("hrow");
       {const nm=li.querySelector(".nm");nm.textContent=v.session||"Attendance";nm.title=v.session||"";nm.onclick=()=>nm.classList.toggle("open")}
       {const it=v.items||[],ro=v.roster||[],c=calc(it,ro),pr=it.length-c.extra.length;li.querySelector(".muted").textContent=(adm&&(v.meta||{}).subject?v.meta.subject+" \u00b7 ":"")+(ro.length?Math.round(pr/ro.length*100)+"% attendance ("+pr+"/"+ro.length+")":it.length+" present")}
       li.querySelector('[data-a="x"]').onclick=()=>xlsxOut(v);
@@ -610,9 +597,6 @@ function drawCloud(){
         try{await d.ref.delete();cdocs=cdocs.filter(x=>x.d!==d);fillFilters();drawCloud();show("Session deleted","ok")}
         catch(e){show(e.code==="permission-denied"?"Not allowed. Publish the updated Firestore rules.":e.message,"bad")}
       };
-      // regular user: hide from own history only (nothing is deleted from the cloud or the admin view)
-      const hb=li.querySelector('[data-a="h"]');
-      if(hb)hb.onclick=()=>{if(!confirm("Remove this session from your history?\n"+(v.session||"")))return;hidAdd(d.id);cdocs=cdocs.filter(x=>x.d!==d);fillFilters();drawCloud();show("Removed from your history","ok")};
       const r=li.querySelector('[data-a="r"]');if(r)r.onclick=()=>{if(confirm("Restore this session on this device?"))restore(v)};
       ul.appendChild(li);
     });
@@ -623,9 +607,7 @@ async function loadCloud(){
   $("cl").innerHTML='<div class="empty">Loading...</div>';
   try{
     const q=await (isAdm(user)?db.collectionGroup("sessions"):db.collection("backups").doc(user.uid).collection("sessions")).get();
-    if(!isAdm(user))await hidLoad();
-    const hid=isAdm(user)?new Set():hidGet();
-    cdocs=q.docs.filter(d=>!hid.has(d.id)).map(d=>({d,v:d.data()})).sort((a,b)=>((b.v.updated&&b.v.updated.seconds)||0)-((a.v.updated&&a.v.updated.seconds)||0));
+    cdocs=q.docs.map(d=>({d,v:d.data()})).sort((a,b)=>((b.v.updated&&b.v.updated.seconds)||0)-((a.v.updated&&a.v.updated.seconds)||0));
     fillFilters();drawCloud();
   }catch(e){$("cl").innerHTML="";show(e.code==="permission-denied"?"Access denied. Publish the updated Firestore rules.":e.message,"bad")}
 }
