@@ -21,8 +21,8 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#f7f1f0;--card:#fff;--text:#2b1517;--muted:#7a6264;--line:#eadcdb;--brand:#701313;--btn:#8a1a1f;--gold:#f0b27a;--bad:#c62828;--note:#b45309}
-@media (prefers-color-scheme:dark){:root{--bg:#160b0c;--card:#231214;--text:#f4eaea;--muted:#b9a2a3;--line:#3a2326;--btn:#a3232a;--note:#f0b27a;--bad:#ef6a6a;color-scheme:dark}}
+:root{--bg:#f7f1f0;--card:#fff;--text:#2b1517;--muted:#7a6264;--line:#eadcdb;--brand:#701313;--btn:#8a1a1f;--gold:#f0b27a;--bad:#c62828;--note:#b45309;--ok:#1b8a4b;--warn:#e8710a}
+@media (prefers-color-scheme:dark){:root{--bg:#160b0c;--card:#231214;--text:#f4eaea;--muted:#b9a2a3;--line:#3a2326;--btn:#a3232a;--note:#f0b27a;--bad:#ef6a6a;--ok:#4ade80;--warn:#fb923c;color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Inter,system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5}
@@ -87,7 +87,85 @@ li .nm{font-weight:600}
 .ver{opacity:.65;font-size:.7rem}
 .foot{text-align:center;color:var(--muted);font-size:.75rem;padding:8px 0 24px;line-height:1.7}
 .foot b{font:italic 600 .9rem Georgia,"Times New Roman",serif;color:var(--text)}
+/* orange warning (not in list) */
+.cam .frame.warn i{border-color:#fb923c}
+#msg.warn{display:block;background:#e8710a}
+/* stats cards + attendance bar */
+.sgrid{display:flex;gap:8px}
+.sc{flex:1;min-width:0;text-align:center;padding:10px 4px;border-radius:12px;background:var(--bg);border:1px solid var(--line);border-top:4px solid var(--c)}
+.sc b{display:block;font-size:1.5rem;line-height:1.15;color:var(--c)}
+.sc span{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-top:2px}
+.sc.p{--c:var(--ok)}.sc.a{--c:var(--bad)}.sc.w{--c:var(--warn)}
+.pbar{margin-top:10px}
+.pbar .pl{display:flex;justify-content:space-between;align-items:baseline;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:5px}
+.pbar .pl b{font-size:1rem;color:var(--text)}
+.pbar .tr{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.pbar .tr i{display:block;height:100%;border-radius:99px;background:var(--ok);transition:width .4s}
+/* history: collapsible subjects */
+details.sg{margin-top:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
+details.sg>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:11px 12px;font-weight:700}
+details.sg>summary::-webkit-details-marker{display:none}
+details.sg>summary::before{content:"";flex:none;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s}
+details.sg[open]>summary::before{transform:rotate(45deg)}
+details.sg>summary .t{flex:1;min-width:0;word-break:break-word}
+details.sg>summary .c{flex:none;font-size:.75rem;font-weight:600;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:1px 9px}
+details.sg>ul{margin:0;padding:0 12px 4px;background:var(--card)}
+.ic.x{width:30px;height:30px;font-size:1.15rem;line-height:1;padding:0;border-radius:50%}
 select{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(128,128,128,.35);background:transparent;color:inherit;font:inherit}
+/* ===== modern & simple UI layer ===== */
+:root{--bg:#f6f4f3;--card:#fff;--line:#ece6e5;--text:#241617;--muted:#85706f;--r:16px;--sh:0 1px 2px rgba(60,20,20,.04),0 6px 20px rgba(60,20,20,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#120a0b;--card:#1d1112;--line:#32201f;--text:#f3eaea;--muted:#b09b9c;--sh:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25)}}
+body{-webkit-font-smoothing:antialiased;font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.top{position:sticky;top:0;z-index:20;border-bottom:0;box-shadow:0 2px 14px rgba(60,10,10,.25);padding-bottom:12px}
+.top img{height:38px}
+.top #logout{border-radius:99px;padding:7px 14px;font-size:.85rem;font-weight:500}
+main{padding:16px 14px 8px}
+.card{border:0;border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
+.card>.head strong{font-size:1.02rem;letter-spacing:-.01em}
+label{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:600;margin:12px 0 5px}
+input,select{border-radius:12px;border:1.5px solid var(--line);background:var(--bg);padding:11px 12px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{outline:0;border-color:var(--btn);box-shadow:0 0 0 3px rgba(138,26,31,.14)}
+select{background:var(--bg);border:1.5px solid var(--line)}
+button{border-radius:12px;padding:11px 14px;font-weight:600;transition:transform .08s,opacity .15s,background .15s}
+button:active{transform:scale(.97)}
+button:hover{opacity:.93}
+button.sec{background:var(--bg);border:1.5px solid transparent;color:var(--text)}
+button.sec:hover{border-color:var(--line)}
+button.danger{background:transparent;border:1.5px solid color-mix(in srgb,var(--bad) 45%,transparent)}
+.seg{background:var(--bg);border:0;border-radius:99px;padding:4px;gap:4px}
+.seg button{border-radius:99px;padding:9px 12px}
+.seg button.on{box-shadow:0 2px 8px rgba(138,26,31,.3)}
+.seg button.on.out{box-shadow:0 2px 8px rgba(240,178,122,.45)}
+.cam,#reader{border-radius:var(--r)}
+.row{gap:10px}
+#msg{border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.25);backdrop-filter:blur(6px);max-width:560px;margin:0 auto}
+li{border-top:1px solid var(--line);padding:12px 0}
+li:first-child{border-top:0}
+li .nm{font-weight:600;letter-spacing:-.005em}
+.ic{border-radius:10px;border:0;background:var(--bg);width:38px;height:38px}
+.ic.has{background:color-mix(in srgb,var(--note) 14%,transparent)}
+.ic.del{background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.ic.x{border-radius:50%;width:28px;height:28px;font-size:1.05rem}
+.grp{margin-top:16px;padding:6px 2px;background:none;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+details.sg{border:0;border-radius:14px;background:var(--bg);margin-top:10px}
+details.sg>summary{padding:13px 14px}
+details.sg>ul{background:transparent;padding:0 14px 4px}
+details.sg>summary .c{background:var(--card);border:0}
+.sgrid{gap:10px}
+.sc{border:0;border-top:0;border-radius:14px;padding:12px 4px;background:color-mix(in srgb,var(--c) 10%,var(--card))}
+.sc b{font-size:1.6rem;letter-spacing:-.02em}
+.sc span{color:var(--c);font-weight:600;opacity:.9}
+.pbar .tr{height:8px}
+.pbar .tr i{background:linear-gradient(90deg,var(--ok),color-mix(in srgb,var(--ok) 70%,#fff))}
+.empty{padding:22px 0}
+.foot{padding:12px 0 28px}
+/* lock screen */
+#lock{background:radial-gradient(120% 70% at 50% 0,#9a2226 0,var(--brand) 55%,#4d0b0b 100%)}
+.pinbox{border-radius:20px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);backdrop-filter:blur(8px);padding:18px}
+.pinbox input{border-radius:12px;padding:12px}
+.pinbox button{border-radius:12px}
+.credit{border:0;padding:8px 0}
+.credit b{font-size:1.2rem}
 </style>
 </head>
 <body>
@@ -120,7 +198,7 @@ select{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(128,128,
 <div id="app" hidden>
   <header class="top"><img class="lg" alt="May University in Cairo"><button id="logout" style="margin-left:auto;flex:none;min-width:0;background:transparent;border:1px solid rgba(255,255,255,.5)">Sign out</button></header>
   <main>
-    <div class="card" id="cloudCard" hidden><button id="clRef" class="sec" style="width:100%">History</button><div id="clBody" hidden><div class="muted" id="clHint" style="margin-top:10px"></div><div class="row" style="margin-top:10px"><select id="fLevel" style="flex:1;min-width:0"></select><select id="fGroup" style="flex:1;min-width:0"></select><select id="fSubj" style="flex:1;min-width:0"></select></div><input id="clQ" type="search" dir="auto" placeholder="Search by session name or email" style="margin-top:10px"><ul id="cl"></ul></div></div>
+    <div class="card" id="cloudCard" hidden><button id="clRef" class="sec" style="width:100%">History</button><div id="clBody" hidden><div class="muted" id="clHint" style="margin-top:10px"></div><div class="row" style="margin-top:10px"><select id="fLevel" style="flex:1;min-width:0"></select><select id="fGroup" style="flex:1;min-width:0"></select><select id="fSubj" style="flex:1;min-width:0"></select></div><input id="clQ" type="search" dir="auto" placeholder="Search by session name or email" style="margin-top:10px"><div id="cl"></div></div></div>
     <div class="card" id="repCard" hidden><button id="repBtn" class="sec" style="width:100%">Attendance report</button><div id="repBody" hidden><select id="repSel" style="margin-top:10px"></select><label>Minimum attendance %</label><input id="repMin" type="number" min="0" max="100" value="75"><div class="muted" id="repSum" style="margin-top:8px"></div><ul id="repList"></ul><button id="repXls" style="width:100%;margin-top:10px">Download Excel</button></div></div>
     <div class="card" id="adminCard" hidden><div class="head"><strong>Users &amp; access</strong><button id="admRef" class="sec" style="flex:none;min-width:0">Refresh</button></div><ul id="reqs"></ul></div>
     <div class="card att">
@@ -142,7 +220,7 @@ select{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(128,128,
     <div class="card att">
       <div class="head"><strong>Attendance</strong><span style="display:flex;align-items:center;gap:10px"><span class="muted" id="count"></span><button id="addP" class="ic" title="Add a student manually" aria-label="Add a student manually"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button></span></div>
       <div id="manual" hidden style="margin-top:10px"><input id="mId" inputmode="numeric" placeholder="Student ID"><input id="mName" dir="auto" placeholder="Student name" style="margin-top:8px"><div class="row" style="margin-top:8px"><button id="mAdd">Add check-in</button><button id="mCancel" class="sec">Close</button></div></div>
-      <div id="stats" style="margin-top:8px;font-weight:600"></div><div id="cloudSt" class="muted" style="font-size:.78rem;margin-top:2px"></div>
+      <div id="stats" style="margin-top:10px"></div><div id="cloudSt" class="muted" style="font-size:.78rem;margin-top:2px"></div>
       <input id="search" type="search" dir="auto" placeholder="Search by name, ID or note" style="margin-top:10px">
       <ul id="list"></ul>
       <div class="row"><button id="endAll" class="sec">End lecture</button><button id="clear" class="danger">Clear Session</button></div>
@@ -233,8 +311,11 @@ async function readRoster(f){
 function rosterInfo(){$("rosterInfo").textContent=roster.length?"Students list for this subject: "+roster.length+" students":"No students list for this subject yet. Upload one."}
 function syncUI(){if(sess.subject&&!subjects.includes(sess.subject)){subjects.push(sess.subject);store("qra_subjects",subjects)}fillSubjects();["year","group","subject","lecture","date"].forEach(k=>{$(k).value=sess[k]});rosterInfo()}
 function renderStats(){
-  const all=cur(),c=calc(all,roster);
-  $("stats").textContent=roster.length?"Present "+(all.length-c.extra.length)+" \u00b7 Absent "+c.absent.length+(c.extra.length?" \u00b7 Not in list "+c.extra.length:"")+" \u00b7 List "+roster.length:"";
+  const all=cur(),c=calc(all,roster),el=$("stats");
+  if(!roster.length){el.innerHTML="";return}
+  const pr=all.length-c.extra.length,pct=Math.round(pr/roster.length*100);
+  el.innerHTML='<div class="sgrid"><div class="sc p"><b>'+pr+'</b><span>Present</span></div><div class="sc a"><b>'+c.absent.length+'</b><span>Absent</span></div><div class="sc w"><b>'+c.extra.length+'</b><span>Not in list</span></div></div>'
+   +'<div class="pbar"><div class="pl"><span>Attendance rate \u00b7 '+pr+' of '+roster.length+'</span><b>'+pct+'%</b></div><div class="tr" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div></div>';
 }
 function saveXlsx(l,ro,meta,key){
   if(!l.length&&!ro.length){show("No data to export","bad");return}
@@ -276,7 +357,7 @@ const IC_OUT=svg('<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 1
 const IC_UNDO=svg('<path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-15-6.7L3 13"/>');
 const IC_DEL=svg('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>');
 
-function show(t,c){const m=$("msg");m.textContent=t;m.className=c;clearTimeout(msgT);msgT=setTimeout(()=>{m.className=""},c==="bad"?4000:2500)}
+function show(t,c){const m=$("msg");m.textContent=t;m.className=c;clearTimeout(msgT);msgT=setTimeout(()=>{m.className=""},c==="bad"||c==="warn"?4000:2500)}
 function beep(f){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.frequency.value=f;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close()},120)}catch(e){}}
 
 function parse(t){
@@ -350,7 +431,7 @@ function onScan(text){
   }
   if(ex)return bad(nm+(ex.timeOut?" already checked in and out":" is already checked in"));
   items.push({session:sessionKey(),id:p.id,name:p.name||rname(p.id),raw:text,time:new Date().toISOString()});
-  store(K.items,items);render();if(roster.length&&!rhas(p.id)){beep(400);show(nm+" is not in this group's list (recorded anyway)","bad");flash("bad")}else{beep(900);show("Checked in: "+nm,"ok");flash("ok")}
+  store(K.items,items);render();if(roster.length&&!rhas(p.id)){beep(400);show(nm+" is not in this group's list (recorded anyway)","warn");flash("warn")}else{beep(900);show("Checked in: "+nm,"ok");flash("ok")}
 }
 let mode=load("qra_mode","in"),flT;
 function flash(c){const f=$("frame");f.className="frame "+c;clearTimeout(flT);flT=setTimeout(()=>{f.className="frame"},700)}
@@ -408,7 +489,7 @@ $("mAdd").onclick=()=>{
   const t=new Date().toISOString();
   items.push({session:sessionKey(),id,name:nm,raw:"manual",time:t,note:"Added manually",noteTime:t});
   store(K.items,items);render();
-  if(roster.length&&!rhas(id)){beep(400);show(nm+" is not in this group's list (recorded anyway)","bad")}else{beep(900);show("Checked in: "+nm,"ok")}
+  if(roster.length&&!rhas(id)){beep(400);show(nm+" is not in this group's list (recorded anyway)","warn")}else{beep(900);show("Checked in: "+nm,"ok")}
   $("mId").value="";$("mName").value="";delete $("mName").dataset.typed;$("mId").focus();
 };
 render();
@@ -443,7 +524,7 @@ async function gate(u){
     let d=await ref.get();
     if(!d.exists){await ref.set({email:u.email.toLowerCase(),status:isAdm(u)?"approved":"pending",created:firebase.firestore.FieldValue.serverTimestamp()});d=await ref.get()}
     const st=d.data().status;
-    if(st==="approved"){approved=true;try{localStorage.setItem("qra_ok",u.uid)}catch(e){}openApp();$("adminCard").hidden=!isAdm(u);document.querySelectorAll(".att").forEach(e=>e.hidden=isAdm(u));$("cloudCard").hidden=false;$("repCard").hidden=!isAdm(u);$("clHint").textContent=isAdm(u)?"All lecturers' sessions. Tap ↓ to download Excel.":"Your saved sessions. Tap ↺ to restore one on this device, ↓ to download Excel.";if(isAdm(u))loadReqs();render();return}
+    if(st==="approved"){approved=true;try{localStorage.setItem("qra_ok",u.uid)}catch(e){}openApp();$("adminCard").hidden=!isAdm(u);document.querySelectorAll(".att").forEach(e=>e.hidden=isAdm(u));$("cloudCard").hidden=false;$("repCard").hidden=!isAdm(u);$("clHint").textContent=isAdm(u)?"All lecturers' sessions. Tap ↓ to download Excel.":"Your saved sessions, grouped by subject. Tap ↺ to restore, ↓ to download Excel, × to remove it from your list (the admin copy is kept).";if(isAdm(u))loadReqs();render();return}
     lockUI(false,st==="rejected"?"Your access request was declined.":"Your request is waiting for approval. Tap Check again later.",false);
   }catch(e){
     // offline: let a previously approved user keep working
@@ -483,35 +564,58 @@ function restore(v){
   syncUI();store(K.items,items);cj="";render();show("Restored "+n+" student(s) from the cloud","ok");
 }
 let cdocs=[];
+const openSubj=new Set();
+const hidKey=()=>"qra_hid_"+(user?user.uid:"");
+const hidGet=()=>new Set(load(hidKey(),[]));
+const hidAdd=id=>{const h=hidGet();h.add(id);store(hidKey(),[...h])};
+const hidDel=id=>{const h=hidGet();if(h.delete(id))store(hidKey(),[...h])};
 function drawCloud(){
-  const ul=$("cl"),q=norm($("clQ").value.trim()),adm=isAdm(user);ul.innerHTML="";
-  const fl=$("fLevel").value,fg=$("fGroup").value,fs=$("fSubj").value;
+  const box=$("cl"),q=norm($("clQ").value.trim()),adm=isAdm(user);box.innerHTML="";
+  const fl=$("fLevel").value,fg=$("fGroup").value,fs=$("fSubj").value,filt=!!(q||fl||fg||fs);
   const list=cdocs.filter(({v})=>{const m=v.meta||{};return(!fl||m.year===fl)&&(!fg||m.group===fg)&&(!fs||m.subject===fs)&&(!q||norm((v.session||"")+" "+(v.by||"")).includes(q))});
-  if(!list.length){ul.innerHTML='<div class="empty">'+(cdocs.length?"No results found":"No saved sessions yet")+'</div>';return}
-  if(adm)list.sort((a,b)=>String(a.v.by||"").localeCompare(String(b.v.by||"")));
-  const cnt={};list.forEach(x=>{const o=x.d.ref.parent.parent.id;cnt[o]=(cnt[o]||0)+1});let lastO=null;
-  list.forEach(({d,v})=>{
-    if(adm){const o=d.ref.parent.parent.id;if(o!==lastO){lastO=o;const h=document.createElement("li");h.className="grp";h.textContent=(v.by||o)+" \u00b7 "+cnt[o]+" session(s)";ul.appendChild(h)}}
-    const mine=d.ref.parent.parent.id===user.uid,li=document.createElement("li");
-    li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+(adm?'<button class="ic del" data-a="d" title="Delete session" aria-label="Delete session">'+IC_DEL+'</button>':'')+'</div>';
-    li.querySelector(".nm").textContent=v.session||"Attendance";
-    {const it=v.items||[],ro=v.roster||[],c=calc(it,ro),pr=it.length-c.extra.length;li.querySelector(".muted").textContent=(adm?(v.by||"")+" \u00b7 ":"")+(ro.length?Math.round(pr/ro.length*100)+"% attendance ("+pr+"/"+ro.length+")":it.length+" present")}
-    li.querySelector('[data-a="x"]').onclick=()=>xlsxOut(v);
-    const dl=li.querySelector('[data-a="d"]');
-    if(dl)dl.onclick=async()=>{
-      if(!confirm("Delete this session permanently from the cloud?\n"+(v.session||"")+"\n"+(v.by||"")))return;
-      try{await d.ref.delete();cdocs=cdocs.filter(x=>x.d!==d);fillFilters();drawCloud();show("Session deleted","ok")}
-      catch(e){show(e.code==="permission-denied"?"Not allowed. Publish the updated Firestore rules.":e.message,"bad")}
-    };
-    const r=li.querySelector('[data-a="r"]');if(r)r.onclick=()=>{if(confirm("Restore this session on this device?"))restore(v)};
-    ul.appendChild(li);
+  if(!list.length){box.innerHTML='<div class="empty">'+(cdocs.length?"No results found":"No saved sessions yet")+'</div>';return}
+  const owner=x=>x.d.ref.parent.parent.id,subj=x=>((x.v.meta||{}).subject||"").trim()||"No subject";
+  // newest lecture date first inside each subject
+  list.sort((a,b)=>(adm?String(a.v.by||"").localeCompare(String(b.v.by||"")):0)||subj(a).localeCompare(subj(b))||String((b.v.meta||{}).date||"").localeCompare(String((a.v.meta||{}).date||"")));
+  const cnt={};list.forEach(x=>{const o=owner(x);cnt[o]=(cnt[o]||0)+1});
+  const groups=[];list.forEach(x=>{const k=(adm?owner(x)+"|":"")+subj(x);let g=groups[groups.length-1];if(!g||g.k!==k){g={k,o:owner(x),by:x.v.by,name:subj(x),items:[]};groups.push(g)}g.items.push(x)});
+  let lastO=null;
+  groups.forEach(g=>{
+    if(adm&&g.o!==lastO){lastO=g.o;const h=document.createElement("div");h.className="grp";h.textContent=(g.by||g.o)+" \u00b7 "+cnt[g.o]+" session(s)";box.appendChild(h)}
+    const det=document.createElement("details");det.className="sg";det.open=filt||openSubj.has(g.k);
+    det.ontoggle=()=>{if(filt)return;det.open?openSubj.add(g.k):openSubj.delete(g.k)};
+    const sm=document.createElement("summary");sm.innerHTML='<span class="t" dir="auto"></span><span class="c"></span>';
+    sm.querySelector(".t").textContent=g.name;sm.querySelector(".c").textContent=g.items.length;det.appendChild(sm);
+    const ul=document.createElement("ul");det.appendChild(ul);
+    g.items.forEach(({d,v})=>{
+      const mine=owner({d})===user.uid,li=document.createElement("li");
+      li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+((adm||mine)?'<button class="ic del x" data-a="d" title="Delete session" aria-label="Delete session">\u00d7</button>':'')+'</div>';
+      li.querySelector(".nm").textContent=v.session||"Attendance";
+      {const it=v.items||[],ro=v.roster||[],c=calc(it,ro),pr=it.length-c.extra.length;li.querySelector(".muted").textContent=(adm?(v.by||"")+" \u00b7 ":"")+(ro.length?Math.round(pr/ro.length*100)+"% attendance ("+pr+"/"+ro.length+")":it.length+" present")}
+      li.querySelector('[data-a="x"]').onclick=()=>xlsxOut(v);
+      const dl=li.querySelector('[data-a="d"]');
+      if(dl)dl.onclick=async()=>{
+        if(!adm){
+          // regular user: only hide from their own history. Nothing is deleted from the cloud or the admin view.
+          if(!confirm("Remove this session from your history?\n"+(v.session||"")))return;
+          hidAdd(d.id);cdocs=cdocs.filter(x=>x.d!==d);fillFilters();drawCloud();show("Removed from your history","ok");return;
+        }
+        if(!confirm("Delete this session permanently from the cloud?\n"+(v.session||"")+"\n"+(v.by||"")))return;
+        try{await d.ref.delete();cdocs=cdocs.filter(x=>x.d!==d);fillFilters();drawCloud();show("Session deleted","ok")}
+        catch(e){show(e.code==="permission-denied"?"Not allowed. Publish the updated Firestore rules.":e.message,"bad")}
+      };
+      const r=li.querySelector('[data-a="r"]');if(r)r.onclick=()=>{if(confirm("Restore this session on this device?"))restore(v)};
+      ul.appendChild(li);
+    });
+    box.appendChild(det);
   });
 }
 async function loadCloud(){
   $("cl").innerHTML='<div class="empty">Loading...</div>';
   try{
     const q=await (isAdm(user)?db.collectionGroup("sessions"):db.collection("backups").doc(user.uid).collection("sessions")).get();
-    cdocs=q.docs.map(d=>({d,v:d.data()})).sort((a,b)=>((b.v.updated&&b.v.updated.seconds)||0)-((a.v.updated&&a.v.updated.seconds)||0));
+    const hid=isAdm(user)?new Set():hidGet();
+    cdocs=q.docs.filter(d=>!hid.has(d.id)).map(d=>({d,v:d.data()})).sort((a,b)=>((b.v.updated&&b.v.updated.seconds)||0)-((a.v.updated&&a.v.updated.seconds)||0));
     fillFilters();drawCloud();
   }catch(e){$("cl").innerHTML="";show(e.code==="permission-denied"?"Access denied. Publish the updated Firestore rules.":e.message,"bad")}
 }
@@ -566,7 +670,7 @@ window.addEventListener("online",()=>{cj="";render()});
 function cloud(){
   if(!approved){if(user&&cur().length)cst("Saved on this device only (offline)","var(--note)");return}
   const l=cur();if(!l.length){cst("");return}
-  const j=JSON.stringify([l,roster,sess]);if(j===cj)return;cj=j;clearTimeout(ct);cst("Saving...","");
+  const j=JSON.stringify([l,roster,sess]);if(j===cj)return;cj=j;clearTimeout(ct);cst("Saving...","");hidDel(encodeURIComponent(sessionKey()));
   ct=setTimeout(()=>db.collection("backups").doc(user.uid).collection("sessions").doc(encodeURIComponent(sessionKey())).set({session:sessionKey(),by:user.email,updated:firebase.firestore.FieldValue.serverTimestamp(),items:l.map(x=>JSON.parse(JSON.stringify(x))),roster:roster,meta:{year:sess.year,group:sess.group,subject:sess.subject,lecture:sess.lecture,date:sess.date}}).then(()=>cst("Saved to cloud \u2713 "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}),"#1b8a4b")).catch(()=>{cj="";cst("Not saved yet. Will retry when online","var(--note)")}),2000);
 }
 </script>
