@@ -147,11 +147,12 @@ details.sg>summary .c{flex:none;font-size:.75rem;font-weight:600;color:var(--mut
 details.sg>ul{margin:0;padding:0 14px 4px;background:var(--card)}
 .ic.x{width:30px;height:30px;min-height:30px;border-radius:50%;font-size:1.1rem;line-height:1;padding:0;min-width:0}
 /* ---- v22b: stats bar, % badge, history × ---- */
-.pct{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;line-height:1.4;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c)}
-.pct.g{--c:var(--ok)}.pct.r{--c:var(--bad)}
+.pct{font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px;line-height:1.4;background:var(--soft);color:var(--muted)}
 .sbar{display:flex;gap:3px;height:8px;margin-top:2px}
 .sbar i{display:block;height:100%;border-radius:99px;min-width:6px;transition:flex .4s}
-.sbar .p{background:var(--ok)}.sbar .a{background:var(--bad)}.sbar .w{background:var(--warn)}
+.sbar{--pg:#8fd3ab;--pr:#f4a9a9;--po:#f8c895}
+@media (prefers-color-scheme:dark){.sbar{--pg:#5fae82;--pr:#cf7f7f;--po:#d6a066}}
+.sbar .p{background:var(--pg)}.sbar .a{background:var(--pr)}.sbar .w{background:var(--po)}
 .snum{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;font-size:.78rem;font-weight:600}
 .snum span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px}
 .snum .sp{color:var(--ok)}.snum .sa{color:var(--bad)}.snum .sw{color:var(--warn)}
@@ -163,6 +164,15 @@ li.hist .d{padding-right:30px}
 li.hist .acts{align-self:flex-end;margin-top:22px}
 .hx{position:absolute;top:8px;right:0;flex:none;width:26px;height:26px;min-width:0;min-height:0;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);opacity:.55;font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:color .15s,background .15s,opacity .15s}
 .hx:hover,.hx:active,.hx:focus-visible{color:var(--bad);background:rgba(198,40,40,.12);opacity:1}
+/* history rows: compact, single line */
+li.hist .d{padding-right:0}
+li.hist .acts{align-self:center;margin-top:0;margin-right:26px;gap:6px}
+li .d{min-width:0}
+li.hrow .nm{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+li.hrow .nm.open{white-space:normal;word-break:break-word}
+li.hrow .muted{font-size:.72rem}
+li.hrow .ic{width:32px;height:32px;min-height:32px;border-radius:10px;font-size:.95rem}
+li.hrow .ic svg{width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -311,7 +321,7 @@ function renderStats(){
   const all=cur(),c=calc(all,roster),el=$("stats"),pc=$("pct");
   if(!roster.length){el.innerHTML="";pc.hidden=true;return}
   const pr=all.length-c.extra.length,ab=c.absent.length,ex=c.extra.length,tot=pr+ab+ex,pct=Math.round(pr/roster.length*100);
-  pc.hidden=false;pc.textContent=pct+"%";pc.className="pct "+(pct>=75?"g":"r");
+  pc.hidden=false;pc.textContent=pct+"%";
   const seg=(n,k)=>n?'<i class="'+k+'" style="flex:'+n+'"></i>':"";
   el.innerHTML='<div class="sbar">'+seg(pr,"p")+seg(ab,"a")+seg(ex,"w")+'</div><div class="snum"><span class="sp">Present '+pr+'</span><span class="sa">Absent '+ab+'</span><span class="sw">Not in list '+ex+'</span></div>';
 }
@@ -590,8 +600,8 @@ function drawCloud(){
     g.items.forEach(({d,v})=>{
       const mine=d.ref.parent.parent.id===user.uid,li=document.createElement("li");
       li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+(adm?'<button class="ic del" data-a="d" title="Delete session" aria-label="Delete session">'+IC_DEL+'</button>':'')+'</div>'+(adm?'':'<button class="hx" data-a="h" title="Remove from my history" aria-label="Remove from my history">\u00d7</button>');
-      if(!adm)li.classList.add("hist");
-      li.querySelector(".nm").textContent=v.session||"Attendance";
+      li.classList.add("hrow");if(!adm)li.classList.add("hist");
+      {const nm=li.querySelector(".nm");nm.textContent=v.session||"Attendance";nm.title=v.session||"";nm.onclick=()=>nm.classList.toggle("open")}
       {const it=v.items||[],ro=v.roster||[],c=calc(it,ro),pr=it.length-c.extra.length;li.querySelector(".muted").textContent=(adm&&(v.meta||{}).subject?v.meta.subject+" \u00b7 ":"")+(ro.length?Math.round(pr/ro.length*100)+"% attendance ("+pr+"/"+ro.length+")":it.length+" present")}
       li.querySelector('[data-a="x"]').onclick=()=>xlsxOut(v);
       const dl=li.querySelector('[data-a="d"]');
@@ -671,7 +681,7 @@ function cloud(){
   if(!approved){if(user&&cur().length)cst("Saved on this device only (offline)","var(--note)");return}
   const l=cur();if(!l.length){cst("");return}
   const j=JSON.stringify([l,roster,sess]);if(j===cj)return;cj=j;clearTimeout(ct);cst("Saving...","");
-  ct=setTimeout(()=>db.collection("backups").doc(user.uid).collection("sessions").doc(encodeURIComponent(sessionKey())).set({session:sessionKey(),by:user.email,updated:firebase.firestore.FieldValue.serverTimestamp(),items:l.map(x=>JSON.parse(JSON.stringify(x))),roster:roster,meta:{year:sess.year,group:sess.group,subject:sess.subject,lecture:sess.lecture,date:sess.date}}).then(()=>cst("Saved to cloud \u2713 "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}),"")).catch(()=>{cj="";cst("Not saved yet. Will retry when online","var(--note)")}),2000);
+  ct=setTimeout(()=>db.collection("backups").doc(user.uid).collection("sessions").doc(encodeURIComponent(sessionKey())).set({session:sessionKey(),by:user.email,updated:firebase.firestore.FieldValue.serverTimestamp(),items:l.map(x=>JSON.parse(JSON.stringify(x))),roster:roster,meta:{year:sess.year,group:sess.group,subject:sess.subject,lecture:sess.lecture,date:sess.date}}).then(()=>cst("Saved to cloud \u2713 "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}),"var(--ok)")).catch(()=>{cj="";cst("Not saved yet. Will retry when online","var(--note)")}),2000);
 }
 </script>
 </body>
