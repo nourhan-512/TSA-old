@@ -146,6 +146,23 @@ details.sg>summary .t{flex:1;min-width:0;word-break:break-word}
 details.sg>summary .c{flex:none;font-size:.75rem;font-weight:600;color:var(--muted);background:var(--card);border-radius:99px;padding:1px 9px}
 details.sg>ul{margin:0;padding:0 14px 4px;background:var(--card)}
 .ic.x{width:30px;height:30px;min-height:30px;border-radius:50%;font-size:1.1rem;line-height:1;padding:0;min-width:0}
+/* ---- v22b: stats bar, % badge, history × ---- */
+.pct{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;line-height:1.4;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c)}
+.pct.g{--c:var(--ok)}.pct.r{--c:var(--bad)}
+.sbar{display:flex;gap:3px;height:8px;margin-top:2px}
+.sbar i{display:block;height:100%;border-radius:99px;min-width:6px;transition:flex .4s}
+.sbar .p{background:var(--ok)}.sbar .a{background:var(--bad)}.sbar .w{background:var(--warn)}
+.snum{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;font-size:.78rem;font-weight:600}
+.snum span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px}
+.snum .sp{color:var(--ok)}.snum .sa{color:var(--bad)}.snum .sw{color:var(--warn)}
+#cloudSt{display:flex;align-items:center;gap:5px;font-size:.72rem!important;margin-top:8px!important}
+#cloudSt:empty{display:none}
+#cloudSt svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor}
+li.hist{position:relative}
+li.hist .d{padding-right:30px}
+li.hist .acts{align-self:flex-end;margin-top:22px}
+.hx{position:absolute;top:8px;right:0;flex:none;width:26px;height:26px;min-width:0;min-height:0;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);opacity:.55;font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:color .15s,background .15s,opacity .15s}
+.hx:hover,.hx:active,.hx:focus-visible{color:var(--bad);background:rgba(198,40,40,.12);opacity:1}
 </style>
 </head>
 <body>
@@ -198,7 +215,7 @@ details.sg>ul{margin:0;padding:0 14px 4px;background:var(--card)}
     </div>
 
     <div class="card att">
-      <div class="head"><strong>Attendance</strong><span style="display:flex;align-items:center;gap:10px"><span class="muted" id="count"></span><button id="addP" class="ic" title="Add a student manually" aria-label="Add a student manually"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button></span></div>
+      <div class="head"><span style="display:flex;align-items:center;gap:8px"><strong>Attendance</strong><span id="pct" class="pct" hidden></span></span><span style="display:flex;align-items:center;gap:10px"><span class="muted" id="count"></span><button id="addP" class="ic" title="Add a student manually" aria-label="Add a student manually"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button></span></div>
       <div id="manual" hidden style="margin-top:10px"><input id="mId" inputmode="numeric" placeholder="Student ID"><input id="mName" dir="auto" placeholder="Student name" style="margin-top:8px"><div class="row" style="margin-top:8px"><button id="mAdd">Add check-in</button><button id="mCancel" class="sec">Close</button></div></div>
       <div id="stats" style="margin-top:8px;font-weight:600"></div><div id="cloudSt" class="muted" style="font-size:.78rem;margin-top:2px"></div>
       <input id="search" type="search" dir="auto" placeholder="Search by name, ID or note" style="margin-top:10px">
@@ -291,9 +308,12 @@ async function readRoster(f){
 function rosterInfo(){$("rosterInfo").textContent=roster.length?"Students list for this subject: "+roster.length+" students":"No students list for this subject yet. Upload one."}
 function syncUI(){if(sess.subject&&!subjects.includes(sess.subject)){subjects.push(sess.subject);store("qra_subjects",subjects)}fillSubjects();["year","group","subject","lecture","date"].forEach(k=>{$(k).value=sess[k]});rosterInfo()}
 function renderStats(){
-  const all=cur(),c=calc(all,roster),el=$("stats");
-  if(!roster.length){el.innerHTML="";return}
-  el.innerHTML='<span class="sp">Present '+(all.length-c.extra.length)+'</span><span class="dot">\u00b7</span><span class="sa">Absent '+c.absent.length+'</span><span class="dot">\u00b7</span><span class="sw">Not in list '+c.extra.length+'</span>';
+  const all=cur(),c=calc(all,roster),el=$("stats"),pc=$("pct");
+  if(!roster.length){el.innerHTML="";pc.hidden=true;return}
+  const pr=all.length-c.extra.length,ab=c.absent.length,ex=c.extra.length,tot=pr+ab+ex,pct=Math.round(pr/roster.length*100);
+  pc.hidden=false;pc.textContent=pct+"%";pc.className="pct "+(pct>=75?"g":"r");
+  const seg=(n,k)=>n?'<i class="'+k+'" style="flex:'+n+'"></i>':"";
+  el.innerHTML='<div class="sbar">'+seg(pr,"p")+seg(ab,"a")+seg(ex,"w")+'</div><div class="snum"><span class="sp">Present '+pr+'</span><span class="sa">Absent '+ab+'</span><span class="sw">Not in list '+ex+'</span></div>';
 }
 function saveXlsx(l,ro,meta,key){
   if(!l.length&&!ro.length){show("No data to export","bad");return}
@@ -569,7 +589,8 @@ function drawCloud(){
     const ul=document.createElement("ul");det.appendChild(ul);
     g.items.forEach(({d,v})=>{
       const mine=d.ref.parent.parent.id===user.uid,li=document.createElement("li");
-      li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+(adm?'<button class="ic del" data-a="d" title="Delete session" aria-label="Delete session">'+IC_DEL+'</button>':'<button class="ic del x" data-a="h" title="Remove from my history" aria-label="Remove from my history">\u00d7</button>')+'</div>';
+      li.innerHTML='<div class="d"><div class="nm" dir="auto"></div><div class="muted"></div></div><div class="acts"><button class="ic" data-a="x" title="Download Excel">\u2193</button>'+(mine?'<button class="ic" data-a="r" title="Restore on this device">\u21BA</button>':'')+(adm?'<button class="ic del" data-a="d" title="Delete session" aria-label="Delete session">'+IC_DEL+'</button>':'')+'</div>'+(adm?'':'<button class="hx" data-a="h" title="Remove from my history" aria-label="Remove from my history">\u00d7</button>');
+      if(!adm)li.classList.add("hist");
       li.querySelector(".nm").textContent=v.session||"Attendance";
       {const it=v.items||[],ro=v.roster||[],c=calc(it,ro),pr=it.length-c.extra.length;li.querySelector(".muted").textContent=(adm&&(v.meta||{}).subject?v.meta.subject+" \u00b7 ":"")+(ro.length?Math.round(pr/ro.length*100)+"% attendance ("+pr+"/"+ro.length+")":it.length+" present")}
       li.querySelector('[data-a="x"]').onclick=()=>xlsxOut(v);
@@ -644,13 +665,13 @@ $("repBtn").onclick=()=>{const b=$("repBody");b.hidden=!b.hidden;$("repBtn").tex
 $("repSel").onchange=drawReport;$("repMin").oninput=drawReport;$("repXls").onclick=repXlsx;
 $("clRef").onclick=()=>{const b=$("clBody");b.hidden=!b.hidden;$("clRef").textContent=b.hidden?"History":"Hide history";if(!b.hidden)loadCloud()};
 let cj="",ct;
-function cst(t,c){const e=$("cloudSt");if(e){e.textContent=t;e.style.color=c||""}}
+function cst(t,c){const e=$("cloudSt");if(!e)return;e.innerHTML="";if(!t){return}e.style.color=c||"";const i=document.createElement("span");i.innerHTML='<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10a6 6 0 00-11.6-1.5A4.5 4.5 0 007 18h11a4 4 0 000-8z"/></svg>';e.appendChild(i.firstChild);e.appendChild(document.createTextNode(t))}
 window.addEventListener("online",()=>{cj="";render()});
 function cloud(){
   if(!approved){if(user&&cur().length)cst("Saved on this device only (offline)","var(--note)");return}
   const l=cur();if(!l.length){cst("");return}
   const j=JSON.stringify([l,roster,sess]);if(j===cj)return;cj=j;clearTimeout(ct);cst("Saving...","");
-  ct=setTimeout(()=>db.collection("backups").doc(user.uid).collection("sessions").doc(encodeURIComponent(sessionKey())).set({session:sessionKey(),by:user.email,updated:firebase.firestore.FieldValue.serverTimestamp(),items:l.map(x=>JSON.parse(JSON.stringify(x))),roster:roster,meta:{year:sess.year,group:sess.group,subject:sess.subject,lecture:sess.lecture,date:sess.date}}).then(()=>cst("Saved to cloud \u2713 "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}),"#1b8a4b")).catch(()=>{cj="";cst("Not saved yet. Will retry when online","var(--note)")}),2000);
+  ct=setTimeout(()=>db.collection("backups").doc(user.uid).collection("sessions").doc(encodeURIComponent(sessionKey())).set({session:sessionKey(),by:user.email,updated:firebase.firestore.FieldValue.serverTimestamp(),items:l.map(x=>JSON.parse(JSON.stringify(x))),roster:roster,meta:{year:sess.year,group:sess.group,subject:sess.subject,lecture:sess.lecture,date:sess.date}}).then(()=>cst("Saved to cloud \u2713 "+new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}),"")).catch(()=>{cj="";cst("Not saved yet. Will retry when online","var(--note)")}),2000);
 }
 </script>
 </body>
